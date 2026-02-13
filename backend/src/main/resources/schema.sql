@@ -1,0 +1,132 @@
+-- 宿舍管理系统数据库初始化脚本
+CREATE DATABASE IF NOT EXISTS dorm_db DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE dorm_db;
+
+-- 系统用户表
+CREATE TABLE IF NOT EXISTS sys_user (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL UNIQUE COMMENT '用户名',
+    password VARCHAR(100) NOT NULL COMMENT '密码',
+    real_name VARCHAR(50) COMMENT '真实姓名',
+    phone VARCHAR(20) COMMENT '手机号',
+    role TINYINT NOT NULL DEFAULT 3 COMMENT '角色:1管理员 2宿管 3学生',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态:0禁用 1启用',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted TINYINT DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统用户表';
+
+-- 楼栋表
+CREATE TABLE IF NOT EXISTS building (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL COMMENT '楼栋名称',
+    description VARCHAR(200) COMMENT '描述',
+    gender TINYINT NOT NULL DEFAULT 1 COMMENT '性别:1男 2女',
+    manager_id BIGINT COMMENT '宿管ID',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态:0停用 1启用',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted TINYINT DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='楼栋表';
+
+-- 房间表
+CREATE TABLE IF NOT EXISTS room (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    building_id BIGINT NOT NULL COMMENT '楼栋ID',
+    room_number VARCHAR(20) NOT NULL COMMENT '房间号',
+    capacity INT NOT NULL DEFAULT 4 COMMENT '容量',
+    current_count INT NOT NULL DEFAULT 0 COMMENT '当前人数',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态:0停用 1启用',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted TINYINT DEFAULT 0,
+    INDEX idx_building_id (building_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='房间表';
+
+-- 床位表
+CREATE TABLE IF NOT EXISTS bed (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    room_id BIGINT NOT NULL COMMENT '房间ID',
+    bed_number VARCHAR(10) NOT NULL COMMENT '床位号',
+    student_id BIGINT COMMENT '学生ID',
+    status TINYINT NOT NULL DEFAULT 0 COMMENT '状态:0空闲 1已占用',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_room_id (room_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='床位表';
+
+-- 学生表
+CREATE TABLE IF NOT EXISTS student (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT COMMENT '关联用户ID',
+    student_no VARCHAR(30) NOT NULL UNIQUE COMMENT '学号',
+    name VARCHAR(50) NOT NULL COMMENT '姓名',
+    college VARCHAR(100) COMMENT '学院',
+    major VARCHAR(100) COMMENT '专业',
+    class_name VARCHAR(50) COMMENT '班级',
+    gender TINYINT NOT NULL DEFAULT 1 COMMENT '性别:1男 2女',
+    phone VARCHAR(20) COMMENT '手机号',
+    enroll_date DATE COMMENT '入学日期',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted TINYINT DEFAULT 0,
+    INDEX idx_user_id (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='学生表';
+
+-- 维修申请表
+CREATE TABLE IF NOT EXISTS repair_request (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    student_id BIGINT NOT NULL COMMENT '学生ID',
+    room_id BIGINT NOT NULL COMMENT '房间ID',
+    title VARCHAR(100) NOT NULL COMMENT '标题',
+    description TEXT COMMENT '描述',
+    images VARCHAR(500) COMMENT '图片URL,逗号分隔',
+    status TINYINT NOT NULL DEFAULT 0 COMMENT '状态:0待处理 1处理中 2已完成 3已拒绝',
+    reply VARCHAR(500) COMMENT '回复',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_student_id (student_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='维修申请表';
+
+-- 访客记录表
+CREATE TABLE IF NOT EXISTS visitor_record (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    student_id BIGINT NOT NULL COMMENT '被访学生ID',
+    visitor_name VARCHAR(50) NOT NULL COMMENT '访客姓名',
+    visitor_phone VARCHAR(20) COMMENT '访客电话',
+    id_card VARCHAR(20) COMMENT '身份证号',
+    reason VARCHAR(200) COMMENT '来访事由',
+    visit_time DATETIME NOT NULL COMMENT '来访时间',
+    leave_time DATETIME COMMENT '离开时间',
+    status TINYINT NOT NULL DEFAULT 0 COMMENT '状态:0来访中 1已离开',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_student_id (student_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='访客记录表';
+
+-- 公告表
+CREATE TABLE IF NOT EXISTS announcement (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(100) NOT NULL COMMENT '标题',
+    content TEXT NOT NULL COMMENT '内容',
+    publisher_id BIGINT NOT NULL COMMENT '发布人ID',
+    type TINYINT NOT NULL DEFAULT 1 COMMENT '类型:1通知 2规章 3活动',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态:0下架 1发布',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted TINYINT DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='公告表';
+
+-- 操作日志表
+CREATE TABLE IF NOT EXISTS sys_operation_log (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT COMMENT '用户ID',
+    username VARCHAR(50) COMMENT '用户名',
+    module VARCHAR(50) COMMENT '模块',
+    operation VARCHAR(50) COMMENT '操作',
+    method VARCHAR(200) COMMENT '方法',
+    params TEXT COMMENT '参数',
+    ip VARCHAR(50) COMMENT 'IP地址',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user_id (user_id),
+    INDEX idx_create_time (create_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='操作日志表';
