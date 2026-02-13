@@ -107,6 +107,10 @@ const typeMap = {
 }
 
 onMounted(async () => {
+  // 确保用户信息已加载，避免刷新时角色判断错误
+  if (!userStore.userInfo) {
+    await userStore.getInfo()
+  }
   stats.value = await dashboardApi.stats()
   announcements.value = await announcementApi.latest(5)
 })

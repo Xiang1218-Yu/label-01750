@@ -30,9 +30,7 @@
         <el-table-column prop="visitorName" label="访客姓名" width="100" />
         <el-table-column prop="visitorPhone" label="访客电话" width="130" />
         <el-table-column prop="studentName" label="被访学生" width="100" />
-        <el-table-column label="被访宿舍" width="150">
-          <template #default="{ row }">{{ row.buildingName }} {{ row.roomNumber }}室</template>
-        </el-table-column>
+        <el-table-column prop="roomInfo" label="被访宿舍" width="150" />
         <el-table-column prop="reason" label="来访事由" min-width="150" show-overflow-tooltip />
         <el-table-column prop="visitTime" label="来访时间" width="180" />
         <el-table-column prop="leaveTime" label="离开时间" width="180" />

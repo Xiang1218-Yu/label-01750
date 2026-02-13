@@ -25,9 +25,7 @@
         <el-table-column prop="id" label="ID" width="80" align="center" />
         <el-table-column prop="title" label="标题" min-width="150" show-overflow-tooltip />
         <el-table-column v-if="!isStudent" prop="studentName" label="申请人" width="100" />
-        <el-table-column label="宿舍" width="150">
-          <template #default="{ row }">{{ row.buildingName }} {{ row.roomNumber }}室</template>
-        </el-table-column>
+        <el-table-column prop="roomInfo" label="宿舍" width="150" />
         <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip />
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
@@ -54,7 +52,7 @@
       <el-descriptions :column="2" border>
         <el-descriptions-item label="标题">{{ currentRow?.title }}</el-descriptions-item>
         <el-descriptions-item label="申请人">{{ currentRow?.studentName }}</el-descriptions-item>
-        <el-descriptions-item label="宿舍">{{ currentRow?.buildingName }} {{ currentRow?.roomNumber }}室</el-descriptions-item>
+        <el-descriptions-item label="宿舍">{{ currentRow?.roomInfo }}</el-descriptions-item>
         <el-descriptions-item label="申请时间">{{ currentRow?.createTime }}</el-descriptions-item>
         <el-descriptions-item label="描述" :span="2">{{ currentRow?.description }}</el-descriptions-item>
       </el-descriptions>
@@ -117,7 +115,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { repairApi, buildingApi, roomApi, dashboardApi } from '../api'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
@@ -126,6 +124,7 @@ import { useUserStore } from '../stores/user'
 const userStore = useUserStore()
 const userInfo = computed(() => userStore.userInfo)
 const isStudent = computed(() => userInfo.value?.role === 3)
+const dataLoaded = ref(false)
 
 const loading = ref(false)
 const submitLoading = ref(false)
@@ -270,5 +269,11 @@ const handleCreate = async () => {
   } finally { submitLoading.value = false }
 }
 
-onMounted(loadData)
+onMounted(async () => {
+  // 等待用户信息加载完成
+  if (!userInfo.value) {
+    await userStore.getInfo()
+  }
+  loadData()
+})
 </script>
