@@ -74,20 +74,20 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="手机号"><el-input v-model="form.phone" placeholder="请输入手机号" /></el-form-item>
+            <el-form-item label="手机号" prop="phone"><el-input v-model="form.phone" placeholder="请输入手机号" maxlength="11" /></el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="学院"><el-input v-model="form.college" placeholder="请输入学院" /></el-form-item>
+            <el-form-item label="学院" prop="college"><el-input v-model="form.college" placeholder="请输入学院" /></el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="专业"><el-input v-model="form.major" placeholder="请输入专业" /></el-form-item>
+            <el-form-item label="专业" prop="major"><el-input v-model="form.major" placeholder="请输入专业" /></el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="班级"><el-input v-model="form.className" placeholder="请输入班级" /></el-form-item>
+            <el-form-item label="班级" prop="className"><el-input v-model="form.className" placeholder="请输入班级" /></el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="入学日期"><el-date-picker v-model="form.enrollDate" type="date" placeholder="选择日期" style="width: 100%" value-format="YYYY-MM-DD" /></el-form-item>
@@ -155,9 +155,28 @@ const buildings = ref([])
 const rooms = ref([])
 const beds = ref([])
 const rules = {
-  studentNo: [{ required: true, message: '请输入学号', trigger: 'blur' }],
-  name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
-  gender: [{ required: true, message: '请选择性别', trigger: 'change' }]
+  studentNo: [
+    { required: true, message: '请输入学号', trigger: 'blur' },
+    { min: 4, max: 20, message: '学号长度为4-20位', trigger: 'blur' },
+    { pattern: /^[A-Za-z0-9]+$/, message: '学号只能包含字母和数字', trigger: 'blur' }
+  ],
+  name: [
+    { required: true, message: '请输入姓名', trigger: 'blur' },
+    { min: 2, max: 20, message: '姓名长度为2-20位', trigger: 'blur' }
+  ],
+  gender: [{ required: true, message: '请选择性别', trigger: 'change' }],
+  phone: [
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'blur' }
+  ],
+  college: [
+    { max: 50, message: '学院名称不能超过50个字符', trigger: 'blur' }
+  ],
+  major: [
+    { max: 50, message: '专业名称不能超过50个字符', trigger: 'blur' }
+  ],
+  className: [
+    { max: 50, message: '班级名称不能超过50个字符', trigger: 'blur' }
+  ]
 }
 
 const loadData = async () => {
@@ -198,9 +217,9 @@ const openBedDialog = async (row) => {
   bedForm.bedId = null
   rooms.value = []
   beds.value = []
-  // 获取所有启用的楼栋（不按性别过滤，因为楼栋可能未设置性别）
-  const res = await buildingApi.page({ current: 1, size: 100 })
-  buildings.value = res.records.filter(b => b.status === 1)
+  // 获取所有启用的楼栋
+  const res = await buildingApi.list()
+  buildings.value = res.filter(b => b.status === 1)
   bedDialogVisible.value = true
 }
 

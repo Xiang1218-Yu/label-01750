@@ -77,13 +77,14 @@
         <el-form-item label="姓名" prop="realName">
           <el-input v-model="form.realName" placeholder="请输入姓名" />
         </el-form-item>
-        <el-form-item label="手机号">
-          <el-input v-model="form.phone" placeholder="请输入手机号" />
+        <el-form-item label="手机号" prop="phone">
+          <el-input v-model="form.phone" placeholder="请输入手机号" maxlength="11" />
         </el-form-item>
         <el-form-item label="角色" prop="role">
-          <el-select v-model="form.role" placeholder="请选择角色" style="width: 100%">
+          <el-select v-model="form.role" placeholder="请选择角色" style="width: 100%" :disabled="form.role === 3">
             <el-option label="管理员" :value="1" />
             <el-option label="宿管" :value="2" />
+            <el-option v-if="form.role === 3" label="学生" :value="3" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -115,6 +116,7 @@ const rules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
   realName: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
+  phone: [{ pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'blur' }],
   role: [{ required: true, message: '请选择角色', trigger: 'change' }]
 }
 

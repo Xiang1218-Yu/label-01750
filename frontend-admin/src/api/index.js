@@ -1,10 +1,10 @@
 import request from './request'
 
 export const authApi = {
-  login: (data) => request.post('/auth/login', null, { params: data }),
+  login: (data) => request.post('/auth/login', data),
   logout: () => request.post('/auth/logout'),
   getInfo: () => request.get('/auth/info'),
-  changePassword: (data) => request.put('/auth/password', null, { params: data })
+  changePassword: (data) => request.put('/auth/password', data)
 }
 
 export const userApi = {
@@ -68,4 +68,8 @@ export const announcementApi = {
 
 export const dashboardApi = {
   stats: () => request.get('/dashboard/stats')
+}
+
+export const operationLogApi = {
+  page: (params) => request.get('/logs', { params })
 }

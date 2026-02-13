@@ -17,14 +17,14 @@
     <el-card class="table-card">
       <template #header>
         <div class="card-header">
-          <span>维修申请列表</span>
+          <span>{{ isStudent ? '我的维修申请' : '维修申请列表' }}</span>
           <el-button type="primary" :icon="Plus" @click="openCreateDialog">申请维修</el-button>
         </div>
       </template>
       <el-table :data="tableData" stripe v-loading="loading">
         <el-table-column prop="id" label="ID" width="80" align="center" />
         <el-table-column prop="title" label="标题" min-width="150" show-overflow-tooltip />
-        <el-table-column prop="studentName" label="申请人" width="100" />
+        <el-table-column v-if="!isStudent" prop="studentName" label="申请人" width="100" />
         <el-table-column label="宿舍" width="150">
           <template #default="{ row }">{{ row.buildingName }} {{ row.roomNumber }}室</template>
         </el-table-column>
@@ -34,8 +34,9 @@
             <el-tag :type="statusMap[row.status]?.type">{{ statusMap[row.status]?.label }}</el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="reply" label="回复" min-width="150" show-overflow-tooltip />
         <el-table-column prop="createTime" label="申请时间" width="180" />
-        <el-table-column label="操作" width="120" fixed="right" align="center">
+        <el-table-column v-if="!isStudent" label="操作" width="120" fixed="right" align="center">
           <template #default="{ row }">
             <el-button link type="primary" @click="openProcessDialog(row)">处理</el-button>
           </template>
@@ -76,18 +77,30 @@
       </template>
     </el-dialog>
 
-    <!-- 申请维修弹窗 -->
+    <!-- 申请维修弹窗 - 管理员/宿管 -->
     <el-dialog v-model="createDialogVisible" title="申请维修" width="500px" :close-on-click-modal="false">
       <el-form ref="createFormRef" :model="createForm" :rules="createRules" label-width="80px">
-        <el-form-item label="选择房间" prop="roomId">
-          <el-cascader v-model="createForm.cascaderValue" :options="roomOptions" :props="{ value: 'id', label: 'name', children: 'children' }"
-            placeholder="请选择楼栋和房间" style="width: 100%" @change="handleRoomChange" />
-        </el-form-item>
-        <el-form-item label="申请人" prop="studentId">
-          <el-select v-model="createForm.studentId" placeholder="请选择申请人" filterable style="width: 100%">
-            <el-option v-for="s in roomStudents" :key="s.id" :label="`${s.name} (${s.studentNo})`" :value="s.id" />
-          </el-select>
-        </el-form-item>
+        <!-- 学生角色：显示自动绑定的信息 -->
+        <template v-if="isStudent">
+          <el-form-item label="申请人">
+            <el-input :value="studentInfo?.name" disabled />
+          </el-form-item>
+          <el-form-item label="宿舍">
+            <el-input :value="studentDormInfo" disabled />
+          </el-form-item>
+        </template>
+        <!-- 管理员/宿管：手动选择 -->
+        <template v-else>
+          <el-form-item label="选择房间" prop="roomId">
+            <el-cascader v-model="createForm.cascaderValue" :options="roomOptions" :props="{ value: 'id', label: 'name', children: 'children' }"
+              placeholder="请选择楼栋和房间" style="width: 100%" @change="handleRoomChange" />
+          </el-form-item>
+          <el-form-item label="申请人" prop="studentId">
+            <el-select v-model="createForm.studentId" placeholder="请选择申请人" filterable style="width: 100%">
+              <el-option v-for="s in roomStudents" :key="s.id" :label="`${s.name} (${s.studentNo})`" :value="s.id" />
+            </el-select>
+          </el-form-item>
+        </template>
         <el-form-item label="标题" prop="title">
           <el-input v-model="createForm.title" placeholder="请输入维修标题" />
         </el-form-item>
@@ -97,17 +110,22 @@
       </el-form>
       <template #footer>
         <el-button @click="createDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleCreate" :loading="submitLoading">提交</el-button>
+        <el-button type="primary" @click="handleCreate" :loading="submitLoading" :disabled="isStudent && !studentInfo?.roomId">提交</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { repairApi, buildingApi, roomApi, studentApi } from '../api'
+import { ref, reactive, onMounted, computed } from 'vue'
+import { repairApi, buildingApi, roomApi, dashboardApi } from '../api'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
+import { useUserStore } from '../stores/user'
+
+const userStore = useUserStore()
+const userInfo = computed(() => userStore.userInfo)
+const isStudent = computed(() => userInfo.value?.role === 3)
 
 const loading = ref(false)
 const submitLoading = ref(false)
@@ -120,15 +138,27 @@ const createFormRef = ref()
 const currentRow = ref(null)
 const roomOptions = ref([])
 const roomStudents = ref([])
+const studentInfo = ref(null)
+const studentDormInfo = ref('')
 const query = reactive({ current: 1, size: 10, status: null })
 const processForm = reactive({ status: 1, reply: '' })
 const createForm = reactive({ cascaderValue: [], roomId: null, studentId: null, title: '', description: '' })
-const createRules = {
-  roomId: [{ required: true, message: '请选择房间', trigger: 'change' }],
-  studentId: [{ required: true, message: '请选择申请人', trigger: 'change' }],
-  title: [{ required: true, message: '请输入标题', trigger: 'blur' }],
-  description: [{ required: true, message: '请输入描述', trigger: 'blur' }]
-}
+
+const createRules = computed(() => {
+  if (isStudent.value) {
+    return {
+      title: [{ required: true, message: '请输入标题', trigger: 'blur' }],
+      description: [{ required: true, message: '请输入描述', trigger: 'blur' }]
+    }
+  }
+  return {
+    roomId: [{ required: true, message: '请选择房间', trigger: 'change' }],
+    studentId: [{ required: true, message: '请选择申请人', trigger: 'change' }],
+    title: [{ required: true, message: '请输入标题', trigger: 'blur' }],
+    description: [{ required: true, message: '请输入描述', trigger: 'blur' }]
+  }
+})
+
 const statusMap = {
   0: { label: '待处理', type: 'warning' },
   1: { label: '处理中', type: 'primary' },
@@ -139,15 +169,15 @@ const statusMap = {
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await repairApi.page(query)
+    const res = isStudent.value ? await repairApi.myPage(query) : await repairApi.page(query)
     tableData.value = res.records
     total.value = res.total
   } finally { loading.value = false }
 }
 
 const loadRoomOptions = async () => {
-  const buildingsRes = await buildingApi.page({ current: 1, size: 100 })
-  const buildings = buildingsRes.records.filter(b => b.status === 1)
+  const buildingsList = await buildingApi.list()
+  const buildings = buildingsList.filter(b => b.status === 1)
   const options = []
   for (const b of buildings) {
     const roomsRes = await roomApi.page({ current: 1, size: 100, buildingId: b.id })
@@ -158,6 +188,18 @@ const loadRoomOptions = async () => {
     })
   }
   roomOptions.value = options
+}
+
+const loadStudentInfo = async () => {
+  if (isStudent.value) {
+    const stats = await dashboardApi.stats()
+    studentInfo.value = {
+      id: stats.studentId,
+      name: stats.studentName,
+      roomId: stats.roomId
+    }
+    studentDormInfo.value = stats.dormInfo || '未分配宿舍'
+  }
 }
 
 const resetQuery = () => { query.status = null; query.current = 1; loadData() }
@@ -172,7 +214,15 @@ const openProcessDialog = (row) => {
 const openCreateDialog = async () => {
   Object.assign(createForm, { cascaderValue: [], roomId: null, studentId: null, title: '', description: '' })
   roomStudents.value = []
-  if (roomOptions.value.length === 0) await loadRoomOptions()
+  
+  if (isStudent.value) {
+    await loadStudentInfo()
+    if (!studentInfo.value?.roomId) {
+      ElMessage.warning('您尚未分配宿舍，无法申请维修')
+    }
+  } else {
+    if (roomOptions.value.length === 0) await loadRoomOptions()
+  }
   createDialogVisible.value = true
 }
 
@@ -180,7 +230,6 @@ const handleRoomChange = async (value) => {
   if (value && value.length === 2) {
     createForm.roomId = value[1]
     createForm.studentId = null
-    // 获取该房间的学生
     const beds = await roomApi.getBeds(value[1])
     roomStudents.value = beds.filter(b => b.studentId).map(b => ({ id: b.studentId, name: b.studentName, studentNo: b.studentNo }))
   } else {
@@ -203,7 +252,18 @@ const handleCreate = async () => {
   await createFormRef.value.validate()
   submitLoading.value = true
   try {
-    await repairApi.create({ roomId: createForm.roomId, studentId: createForm.studentId, title: createForm.title, description: createForm.description })
+    const data = {
+      title: createForm.title,
+      description: createForm.description
+    }
+    if (isStudent.value) {
+      data.roomId = studentInfo.value.roomId
+      data.studentId = studentInfo.value.id
+    } else {
+      data.roomId = createForm.roomId
+      data.studentId = createForm.studentId
+    }
+    await repairApi.create(data)
     ElMessage.success('申请成功')
     createDialogVisible.value = false
     loadData()

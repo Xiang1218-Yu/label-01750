@@ -1,6 +1,7 @@
 package com.dorm.controller;
 
 import com.dorm.annotation.OperationLog;
+import com.dorm.annotation.RequireRole;
 import com.dorm.common.PageResult;
 import com.dorm.common.Result;
 import com.dorm.entity.Building;
@@ -13,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/buildings")
 @RequiredArgsConstructor
+@RequireRole({1}) // 仅管理员可访问
 public class BuildingController {
 
     private final BuildingService buildingService;
@@ -26,6 +28,7 @@ public class BuildingController {
     }
 
     @GetMapping("/list")
+    @RequireRole({1, 2}) // 管理员和宿管可获取楼栋列表（用于下拉选择）
     public Result<List<Building>> list() {
         return Result.success(buildingService.list());
     }

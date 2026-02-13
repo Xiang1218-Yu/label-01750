@@ -18,7 +18,8 @@ const routes = [
       { path: 'students', name: 'Students', component: () => import('../views/Students.vue'), meta: { title: '学生管理', roles: [1, 2] } },
       { path: 'repairs', name: 'Repairs', component: () => import('../views/Repairs.vue'), meta: { title: '维修管理' } },
       { path: 'visitors', name: 'Visitors', component: () => import('../views/Visitors.vue'), meta: { title: '访客管理' } },
-      { path: 'announcements', name: 'Announcements', component: () => import('../views/Announcements.vue'), meta: { title: '公告管理' } }
+      { path: 'announcements', name: 'Announcements', component: () => import('../views/Announcements.vue'), meta: { title: '公告管理' } },
+      { path: 'logs', name: 'OperationLogs', component: () => import('../views/OperationLogs.vue'), meta: { title: '操作日志', roles: [1] } }
     ]
   }
 ]

@@ -22,7 +22,7 @@
           <el-icon><UserFilled /></el-icon>
           <template #title>用户管理</template>
         </el-menu-item>
-        <el-menu-item v-if="[1,2].includes(userInfo?.role)" index="/buildings">
+        <el-menu-item v-if="userInfo?.role === 1" index="/buildings">
           <el-icon><OfficeBuilding /></el-icon>
           <template #title>楼栋管理</template>
         </el-menu-item>
@@ -38,13 +38,17 @@
           <el-icon><Tools /></el-icon>
           <template #title>维修管理</template>
         </el-menu-item>
-        <el-menu-item index="/visitors">
+        <el-menu-item v-if="[1,2].includes(userInfo?.role)" index="/visitors">
           <el-icon><Tickets /></el-icon>
           <template #title>访客管理</template>
         </el-menu-item>
         <el-menu-item index="/announcements">
           <el-icon><Bell /></el-icon>
           <template #title>公告管理</template>
+        </el-menu-item>
+        <el-menu-item v-if="userInfo?.role === 1" index="/logs">
+          <el-icon><Document /></el-icon>
+          <template #title>操作日志</template>
         </el-menu-item>
       </el-menu>
     </el-aside>

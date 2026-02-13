@@ -80,7 +80,6 @@ CREATE TABLE IF NOT EXISTS repair_request (
     room_id BIGINT NOT NULL COMMENT '房间ID',
     title VARCHAR(100) NOT NULL COMMENT '标题',
     description TEXT COMMENT '描述',
-    images VARCHAR(500) COMMENT '图片URL,逗号分隔',
     status TINYINT NOT NULL DEFAULT 0 COMMENT '状态:0待处理 1处理中 2已完成 3已拒绝',
     reply VARCHAR(500) COMMENT '回复',
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP,

@@ -8,9 +8,16 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   font-size: 14px;
   color: #303133;
-  background-color: #f5f7fa;
+  background-color: #f0f2f5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+// 主题色变量
+:root {
+  --primary-color: #3d7ab5;
+  --primary-light: #5a9fd4;
+  --primary-dark: #2d5a87;
 }
 
 // 页面容器
@@ -22,6 +29,9 @@ body {
 // 搜索卡片
 .search-card {
   margin-bottom: 16px;
+  border-radius: 8px;
+  border: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   
   .el-form-item {
     margin-bottom: 0;
@@ -31,6 +41,10 @@ body {
 
 // 表格卡片
 .table-card {
+  border-radius: 8px;
+  border: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  
   .card-header {
     display: flex;
     justify-content: space-between;
@@ -38,9 +52,50 @@ body {
     
     span {
       font-size: 14px;
-      font-weight: 500;
+      font-weight: 600;
+      color: #ffffff;
     }
   }
+}
+
+// Element Plus 组件美化
+.el-card {
+  border-radius: 8px;
+  border: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  
+  .el-card__header {
+    border-bottom: 1px solid #f0f2f5;
+    padding: 16px 20px;
+  }
+}
+
+.el-table {
+  --el-table-border-color: #ebeef5;
+  --el-table-header-bg-color: #fafbfc;
+  
+  th.el-table__cell {
+    background-color: #fafbfc;
+    color: #606266;
+    font-weight: 600;
+  }
+  
+  .el-table__row:hover > td {
+    background-color: #f5f7fa !important;
+  }
+}
+
+.el-button--primary {
+  --el-button-bg-color: var(--primary-color);
+  --el-button-border-color: var(--primary-color);
+  --el-button-hover-bg-color: var(--primary-light);
+  --el-button-hover-border-color: var(--primary-light);
+  --el-button-active-bg-color: var(--primary-dark);
+  --el-button-active-border-color: var(--primary-dark);
+}
+
+.el-menu-item.is-active {
+  background-color: rgba(61, 122, 181, 0.15) !important;
 }
 
 // 修复按钮图标和文字垂直居中
@@ -63,6 +118,50 @@ body {
   justify-content: flex-end;
 }
 
+// 对话框美化
+.el-dialog {
+  border-radius: 12px;
+  
+  .el-dialog__header {
+    border-bottom: 1px solid #f0f2f5;
+    padding: 16px 20px;
+    margin-right: 0;
+  }
+  
+  .el-dialog__title {
+    font-weight: 600;
+    color: #1e3a5f;
+  }
+  
+  .el-dialog__body {
+    padding: 20px;
+  }
+  
+  .el-dialog__footer {
+    border-top: 1px solid #f0f2f5;
+    padding: 12px 20px;
+  }
+}
+
+// 表单美化
+.el-form-item__label {
+  color: #606266;
+  font-weight: 500;
+}
+
+.el-input__wrapper {
+  border-radius: 6px;
+}
+
+.el-select__wrapper {
+  border-radius: 6px;
+}
+
+// 标签美化
+.el-tag {
+  border-radius: 4px;
+}
+
 // 滚动条美化
 ::-webkit-scrollbar {
   width: 8px;
@@ -80,5 +179,18 @@ body {
   
   &:hover {
     background: #a8a8a8;
+  }
+}
+
+// 统计卡片样式
+.stat-card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   }
 }

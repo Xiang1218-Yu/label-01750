@@ -5,7 +5,7 @@ services:
     image: mysql:8.0
     container_name: dorm-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: dorm_db
     ports:
       - "3306:3306"
@@ -29,7 +29,7 @@ services:
       DB_PORT: 3306
       DB_NAME: dorm_db
       DB_USER: root
-      DB_PASSWORD: root123
+      DB_PASSWORD: root
     depends_on:
       mysql:
         condition: service_healthy

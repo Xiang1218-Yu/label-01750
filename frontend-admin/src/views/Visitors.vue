@@ -59,11 +59,11 @@
         <el-form-item label="访客姓名" prop="visitorName">
           <el-input v-model="form.visitorName" placeholder="请输入访客姓名" />
         </el-form-item>
-        <el-form-item label="访客电话">
-          <el-input v-model="form.visitorPhone" placeholder="请输入访客电话" />
+        <el-form-item label="访客电话" prop="visitorPhone">
+          <el-input v-model="form.visitorPhone" placeholder="请输入访客电话" maxlength="11" />
         </el-form-item>
-        <el-form-item label="身份证号">
-          <el-input v-model="form.idCard" placeholder="请输入身份证号" />
+        <el-form-item label="身份证号" prop="idCard">
+          <el-input v-model="form.idCard" placeholder="请输入身份证号" maxlength="18" />
         </el-form-item>
         <el-form-item label="被访学生" prop="studentId">
           <el-select v-model="form.studentId" placeholder="请选择被访学生" filterable style="width: 100%">
@@ -86,10 +86,15 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { visitorApi, studentApi } from '../api'
+import { useUserStore } from '../stores/user'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
+
+const userStore = useUserStore()
+const userInfo = computed(() => userStore.userInfo)
+const isStudent = computed(() => userInfo.value?.role === 3)
 
 const loading = ref(false)
 const submitLoading = ref(false)
@@ -102,6 +107,8 @@ const query = reactive({ current: 1, size: 10, visitorName: '', status: null })
 const form = reactive({ visitorName: '', visitorPhone: '', idCard: '', studentId: null, reason: '', visitTime: '' })
 const rules = {
   visitorName: [{ required: true, message: '请输入访客姓名', trigger: 'blur' }],
+  visitorPhone: [{ pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'blur' }],
+  idCard: [{ pattern: /^[1-9]\d{5}(18|19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dXx]$/, message: '请输入正确的身份证号格式', trigger: 'blur' }],
   studentId: [{ required: true, message: '请选择被访学生', trigger: 'change' }],
   reason: [{ required: true, message: '请输入来访事由', trigger: 'blur' }],
   visitTime: [{ required: true, message: '请选择来访时间', trigger: 'change' }]
@@ -110,13 +117,14 @@ const rules = {
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await visitorApi.page(query)
+    const res = isStudent.value ? await visitorApi.myPage(query) : await visitorApi.page(query)
     tableData.value = res.records
     total.value = res.total
   } finally { loading.value = false }
 }
 
 const loadStudents = async () => {
+  if (isStudent.value) return // 学生不需要加载学生列表
   const res = await studentApi.page({ current: 1, size: 1000 })
   students.value = res.records
 }

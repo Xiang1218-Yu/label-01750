@@ -13,7 +13,6 @@ public class RepairRequest {
     private Long roomId;
     private String title;
     private String description;
-    private String images;
     private Integer status;
     private String reply;
     private LocalDateTime createTime;

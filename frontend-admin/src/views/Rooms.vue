@@ -124,8 +124,7 @@ const loadData = async () => {
 }
 
 const loadBuildings = async () => {
-  const res = await buildingApi.page({ current: 1, size: 100 })
-  buildings.value = res.records
+  buildings.value = await buildingApi.list()
 }
 
 const resetQuery = () => { query.buildingId = null; query.roomNumber = ''; query.current = 1; loadData() }
