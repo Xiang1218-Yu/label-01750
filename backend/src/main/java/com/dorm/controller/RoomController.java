@@ -4,6 +4,7 @@ import com.dorm.annotation.OperationLog;
 import com.dorm.annotation.RequireRole;
 import com.dorm.common.PageResult;
 import com.dorm.common.Result;
+import com.dorm.common.RoleConstants;
 import com.dorm.entity.Room;
 import com.dorm.service.RoomService;
 import jakarta.validation.Valid;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/rooms")
 @RequiredArgsConstructor
-@RequireRole({1, 2}) // 管理员和宿管可访问
+@RequireRole({RoleConstants.ADMIN, RoleConstants.DORM_MANAGER}) // 管理员和宿管可访问
 public class RoomController {
 
     private final RoomService roomService;

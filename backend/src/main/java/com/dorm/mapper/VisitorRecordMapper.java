@@ -12,7 +12,9 @@ import org.apache.ibatis.annotations.Select;
 public interface VisitorRecordMapper extends BaseMapper<VisitorRecord> {
     
     @Select("<script>" +
-            "SELECT vr.*, s.name as student_name, CONCAT(b.name, ' ', r.room_number, '室') as room_info " +
+            "SELECT vr.*, s.name as student_name, " +
+            "CASE WHEN b.name IS NOT NULL AND r.room_number IS NOT NULL " +
+            "THEN CONCAT(b.name, ' ', r.room_number, '室') ELSE '未分配宿舍' END as room_info " +
             "FROM visitor_record vr " +
             "LEFT JOIN student s ON vr.student_id = s.id " +
             "LEFT JOIN bed bd ON bd.student_id = s.id " +

@@ -3,6 +3,7 @@ package com.dorm.controller;
 import com.dorm.annotation.RequireRole;
 import com.dorm.common.PageResult;
 import com.dorm.common.Result;
+import com.dorm.common.RoleConstants;
 import com.dorm.entity.SysOperationLog;
 import com.dorm.service.OperationLogService;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/logs")
 @RequiredArgsConstructor
-@RequireRole({1}) // 仅管理员可访问
+@RequireRole({RoleConstants.ADMIN}) // 仅管理员可访问
 public class OperationLogController {
 
     private final OperationLogService logService;

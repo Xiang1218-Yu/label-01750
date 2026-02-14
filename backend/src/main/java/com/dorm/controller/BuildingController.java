@@ -4,6 +4,7 @@ import com.dorm.annotation.OperationLog;
 import com.dorm.annotation.RequireRole;
 import com.dorm.common.PageResult;
 import com.dorm.common.Result;
+import com.dorm.common.RoleConstants;
 import com.dorm.entity.Building;
 import com.dorm.service.BuildingService;
 import jakarta.validation.Valid;
@@ -14,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/buildings")
 @RequiredArgsConstructor
-@RequireRole({1}) // 仅管理员可访问
+@RequireRole({RoleConstants.ADMIN}) // 仅管理员可访问
 public class BuildingController {
 
     private final BuildingService buildingService;
@@ -28,7 +29,7 @@ public class BuildingController {
     }
 
     @GetMapping("/list")
-    @RequireRole({1, 2}) // 管理员和宿管可获取楼栋列表（用于下拉选择）
+    @RequireRole({RoleConstants.ADMIN, RoleConstants.DORM_MANAGER}) // 管理员和宿管可获取楼栋列表（用于下拉选择）
     public Result<List<Building>> list() {
         return Result.success(buildingService.list());
     }

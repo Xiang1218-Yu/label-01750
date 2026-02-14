@@ -4,6 +4,7 @@ import com.dorm.annotation.OperationLog;
 import com.dorm.annotation.RequireRole;
 import com.dorm.common.PageResult;
 import com.dorm.common.Result;
+import com.dorm.common.RoleConstants;
 import com.dorm.entity.SysUser;
 import com.dorm.service.UserService;
 import jakarta.validation.Valid;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-@RequireRole({1}) // 仅管理员可访问
+@RequireRole({RoleConstants.ADMIN}) // 仅管理员可访问
 public class UserController {
 
     private final UserService userService;

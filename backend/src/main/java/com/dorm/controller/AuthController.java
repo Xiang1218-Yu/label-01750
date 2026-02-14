@@ -3,6 +3,7 @@ package com.dorm.controller;
 import com.dorm.annotation.OperationLog;
 import com.dorm.annotation.RequireRole;
 import com.dorm.common.Result;
+import com.dorm.common.RoleConstants;
 import com.dorm.service.AuthService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -40,19 +41,19 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    @RequireRole({1, 2, 3}) // 所有登录用户可访问
+    @RequireRole({RoleConstants.ADMIN, RoleConstants.DORM_MANAGER, RoleConstants.STUDENT}) // 所有登录用户可访问
     public Result<Void> logout() {
         return Result.success();
     }
 
     @GetMapping("/info")
-    @RequireRole({1, 2, 3}) // 所有登录用户可访问
+    @RequireRole({RoleConstants.ADMIN, RoleConstants.DORM_MANAGER, RoleConstants.STUDENT}) // 所有登录用户可访问
     public Result<Map<String, Object>> info() {
         return Result.success(authService.getUserInfo());
     }
 
     @PutMapping("/password")
-    @RequireRole({1, 2, 3}) // 所有登录用户可访问
+    @RequireRole({RoleConstants.ADMIN, RoleConstants.DORM_MANAGER, RoleConstants.STUDENT}) // 所有登录用户可访问
     @OperationLog(module = "认证", operation = "修改密码")
     public Result<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
         authService.changePassword(request.getOldPassword(), request.getNewPassword());
